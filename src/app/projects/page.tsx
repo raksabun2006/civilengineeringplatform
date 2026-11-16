@@ -439,7 +439,7 @@ export default function ProjectsPage() {
                       )}
                     </TableCell>
                     <TableCell className="text-xs text-slate-700">
-                      {project.clientName || 'Civil Client'}
+                      {project.clientName || '-'}
                     </TableCell>
                     <TableCell className="text-xs font-semibold text-slate-900">
                       {formatCurrency(project.estimatedBudget)}

@@ -61,9 +61,9 @@ export default function DocumentsPage() {
     projectId: '',
     title: '',
     type: 'STRUCTURAL_DRAWING',
-    fileUrl: 'https://storage.engineerbiz.com.kh/docs/sample.pdf',
-    fileName: 'structural-dwg-rev2.pdf',
-    fileSize: 4500000,
+    fileUrl: '',
+    fileName: '',
+    fileSize: 0,
     mimeType: 'application/pdf',
     notes: '',
   });

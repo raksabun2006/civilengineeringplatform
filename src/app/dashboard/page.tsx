@@ -12,9 +12,7 @@ import {
   Plus,
   ArrowUpRight,
   Calendar,
-  AlertTriangle,
   Wrench,
-  CheckCircle2,
   ChevronRight,
   Boxes,
 } from 'lucide-react';
@@ -83,6 +81,12 @@ export default function DashboardPage() {
     loadDashboardData();
   }, []);
 
+  // Convert ASCII digits to Khmer digits
+  const toKhmerDigits = (val: number | string) => {
+    const kh = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
+    return String(val).replace(/\d/g, (d) => kh[parseInt(d)]);
+  };
+
   // Format dynamic Khmer / English date
   const todayFormatted = useMemo(() => {
     const now = new Date();
@@ -92,7 +96,7 @@ export default function DashboardPage() {
         'មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា',
         'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ',
       ];
-      return `ថ្ងៃ${days[now.getDay()]} ទី${now.getDate()} ខែ${months[now.getMonth()]} ឆ្នាំ${now.getFullYear()}`;
+      return `ថ្ងៃ${days[now.getDay()]} ទី${toKhmerDigits(now.getDate())} ខែ${months[now.getMonth()]} ឆ្នាំ${toKhmerDigits(now.getFullYear())}`;
     }
     return now.toLocaleDateString('en-US', {
       weekday: 'long',
@@ -102,7 +106,7 @@ export default function DashboardPage() {
     });
   }, [language]);
 
-  // Chart data calculation
+  // Chart data calculation matching Figma preview
   const chartData = useMemo(() => {
     const totalRev = Number(summary?.totalCollected || summary?.totalInvoiced || 624800);
     const totalExp = Number(summary?.totalExpenses || 386240);
@@ -112,12 +116,12 @@ export default function DashboardPage() {
       : ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
 
     return [
-      { name: baseMonths[0], revenue: Math.round(totalRev * 0.12), expenses: Math.round(totalExp * 0.14) },
-      { name: baseMonths[1], revenue: Math.round(totalRev * 0.14), expenses: Math.round(totalExp * 0.13) },
-      { name: baseMonths[2], revenue: Math.round(totalRev * 0.16), expenses: Math.round(totalExp * 0.17) },
-      { name: baseMonths[3], revenue: Math.round(totalRev * 0.18), expenses: Math.round(totalExp * 0.18) },
-      { name: baseMonths[4], revenue: Math.round(totalRev * 0.19), expenses: Math.round(totalExp * 0.19) },
-      { name: baseMonths[5], revenue: Math.round(totalRev * 0.21), expenses: Math.round(totalExp * 0.19) },
+      { name: baseMonths[0], revenue: Math.round(totalRev * 0.06), expenses: Math.round(totalExp * 0.08) },
+      { name: baseMonths[1], revenue: Math.round(totalRev * 0.09), expenses: Math.round(totalExp * 0.10) },
+      { name: baseMonths[2], revenue: Math.round(totalRev * 0.11), expenses: Math.round(totalExp * 0.12) },
+      { name: baseMonths[3], revenue: Math.round(totalRev * 0.16), expenses: Math.round(totalExp * 0.16) },
+      { name: baseMonths[4], revenue: Math.round(totalRev * 0.20), expenses: Math.round(totalExp * 0.18) },
+      { name: baseMonths[5], revenue: Math.round(totalRev * 0.22), expenses: Math.round(totalExp * 0.17) },
     ];
   }, [summary, language]);
 
@@ -127,20 +131,27 @@ export default function DashboardPage() {
     return rev - exp;
   }, [summary]);
 
+  const profitMargin = useMemo(() => {
+    const rev = Number(summary?.totalCollected || summary?.totalInvoiced || 0);
+    if (rev <= 0) return 0;
+    const exp = Number(summary?.totalExpenses || 0);
+    return Math.round(((rev - exp) / rev) * 1000) / 10;
+  }, [summary]);
+
   return (
     <div className="space-y-6 pb-12">
       {/* Top Banner & Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-slate-500 text-xs font-medium mb-1">
-            <Calendar className="h-3.5 w-3.5 text-blue-600" />
+            <Calendar className="h-3.5 w-3.5 text-slate-400" />
             <span>{todayFormatted}</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0B192C] tracking-tight flex items-center gap-2">
             <span>{t.dashboard.greeting}</span>
-            <span className="text-blue-600">{user?.fullName || 'វិស្វករ'}</span>
+            <span>{user?.fullName || 'ដារ៉ា'}</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">{t.dashboard.subtitle}</p>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">{t.dashboard.subtitle}</p>
         </div>
 
         {/* Action Buttons */}
@@ -149,7 +160,7 @@ export default function DashboardPage() {
             variant="outline"
             size="sm"
             onClick={() => window.print()}
-            className="rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50 gap-2 h-10 px-4 text-xs font-semibold shadow-2xs"
+            className="rounded-xl border-slate-200 text-slate-700 bg-white hover:bg-slate-50 gap-2 h-10 px-4 text-xs font-semibold shadow-2xs"
           >
             <Download className="h-4 w-4 text-slate-500" />
             {t.common.downloadReport}
@@ -157,7 +168,7 @@ export default function DashboardPage() {
           <Link href="/projects">
             <Button
               size="sm"
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2 h-10 px-4 text-xs font-semibold shadow-xs"
+              className="bg-[#1D64F2] hover:bg-[#1A56DB] text-white rounded-xl gap-2 h-10 px-5 text-xs font-semibold shadow-xs"
             >
               <Plus className="h-4 w-4" />
               {t.common.newProject}
@@ -166,172 +177,171 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 5 KPI Stat Cards matching Figma Screenshot */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      {/* Row 1: 3 KPI Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {/* 1. Total Projects */}
-        <Card className="p-5 border-slate-200/80 hover:shadow-md transition-shadow">
-          <div className="flex items-start justify-between">
-            <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+        <Card className="p-5 bg-white border border-slate-100 rounded-2xl shadow-xs hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-3.5">
+            <div className="h-11 w-11 rounded-xl bg-blue-50 border border-blue-100/60 text-blue-600 flex items-center justify-center shrink-0">
               <Building2 className="h-5 w-5" />
             </div>
-            <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-              <ArrowUpRight className="h-3 w-3" />
+            <div>
+              <p className="text-sm font-bold text-slate-800 leading-tight">គម្រោងសរុប</p>
+              <p className="text-[11px] font-medium text-slate-400 mt-0.5">Total Projects</p>
+            </div>
+          </div>
+          <div className="flex items-end justify-between mt-4">
+            <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+              {summary?.totalProjects ?? 28}
+            </h3>
+            <span className="inline-flex items-center gap-0.5 text-xs font-bold text-emerald-600">
+              <ArrowUpRight className="h-3.5 w-3.5" />
               +12%
             </span>
-          </div>
-          <div className="mt-4">
-            <p className="text-xs font-medium text-slate-500">{t.dashboard.totalProjects}</p>
-            {loading ? (
-              <Skeleton className="h-8 w-16 mt-1" />
-            ) : (
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">
-                {summary?.totalProjects ?? 28}
-              </h3>
-            )}
           </div>
         </Card>
 
         {/* 2. Active Projects */}
-        <Card className="p-5 border-slate-200/80 hover:shadow-md transition-shadow">
-          <div className="flex items-start justify-between">
-            <div className="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+        <Card className="p-5 bg-white border border-slate-100 rounded-2xl shadow-xs hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-3.5">
+            <div className="h-11 w-11 rounded-xl bg-sky-50 border border-sky-100/60 text-sky-600 flex items-center justify-center shrink-0">
               <TrendingUp className="h-5 w-5" />
             </div>
-            <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-              <ArrowUpRight className="h-3 w-3" />
+            <div>
+              <p className="text-sm font-bold text-slate-800 leading-tight">គម្រោងកំពុងដំណើរការ</p>
+              <p className="text-[11px] font-medium text-slate-400 mt-0.5">Active Projects</p>
+            </div>
+          </div>
+          <div className="flex items-end justify-between mt-4">
+            <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+              {summary?.activeProjects ?? 12}
+            </h3>
+            <span className="inline-flex items-center gap-0.5 text-xs font-bold text-emerald-600">
+              <ArrowUpRight className="h-3.5 w-3.5" />
               +3
             </span>
-          </div>
-          <div className="mt-4">
-            <p className="text-xs font-medium text-slate-500">{t.dashboard.activeProjects}</p>
-            {loading ? (
-              <Skeleton className="h-8 w-16 mt-1" />
-            ) : (
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">
-                {summary?.activeProjects ?? 12}
-              </h3>
-            )}
           </div>
         </Card>
 
         {/* 3. Total Clients */}
-        <Card className="p-5 border-slate-200/80 hover:shadow-md transition-shadow">
-          <div className="flex items-start justify-between">
-            <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+        <Card className="p-5 bg-white border border-slate-100 rounded-2xl shadow-xs hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-3.5">
+            <div className="h-11 w-11 rounded-xl bg-amber-50 border border-amber-100/60 text-amber-600 flex items-center justify-center shrink-0">
               <Users className="h-5 w-5" />
             </div>
-            <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-              <ArrowUpRight className="h-3 w-3" />
+            <div>
+              <p className="text-sm font-bold text-slate-800 leading-tight">អតិថិជនសរុប</p>
+              <p className="text-[11px] font-medium text-slate-400 mt-0.5">Total Clients</p>
+            </div>
+          </div>
+          <div className="flex items-end justify-between mt-4">
+            <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+              {totalClientsCount || 64}
+            </h3>
+            <span className="inline-flex items-center gap-0.5 text-xs font-bold text-emerald-600">
+              <ArrowUpRight className="h-3.5 w-3.5" />
               +8.2%
             </span>
           </div>
-          <div className="mt-4">
-            <p className="text-xs font-medium text-slate-500">{t.dashboard.totalClients}</p>
-            {loading ? (
-              <Skeleton className="h-8 w-16 mt-1" />
-            ) : (
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">
-                {totalClientsCount || 64}
-              </h3>
-            )}
-          </div>
         </Card>
+      </div>
 
+      {/* Row 2: 2 KPI Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* 4. Total Revenue */}
-        <Card className="p-5 border-slate-200/80 hover:shadow-md transition-shadow">
-          <div className="flex items-start justify-between">
-            <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+        <Card className="p-5 bg-white border border-slate-100 rounded-2xl shadow-xs hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-3.5">
+            <div className="h-11 w-11 rounded-xl bg-emerald-50 border border-emerald-100/60 text-emerald-600 flex items-center justify-center shrink-0">
               <CreditCard className="h-5 w-5" />
             </div>
-            <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-              <ArrowUpRight className="h-3 w-3" />
+            <div>
+              <p className="text-sm font-bold text-slate-800 leading-tight">ចំណូលសរុប</p>
+              <p className="text-[11px] font-medium text-slate-400 mt-0.5">Total Revenue</p>
+            </div>
+          </div>
+          <div className="flex items-end justify-between mt-4">
+            <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+              {summary?.totalCollected
+                ? formatCurrency(summary.totalCollected)
+                : '$1.24M'}
+            </h3>
+            <span className="inline-flex items-center gap-0.5 text-xs font-bold text-emerald-600">
+              <ArrowUpRight className="h-3.5 w-3.5" />
               +18.4%
             </span>
-          </div>
-          <div className="mt-4">
-            <p className="text-xs font-medium text-slate-500">{t.dashboard.totalRevenue}</p>
-            {loading ? (
-              <Skeleton className="h-8 w-24 mt-1" />
-            ) : (
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">
-                {summary?.totalCollected
-                  ? formatCurrency(summary.totalCollected)
-                  : '$1.24M'}
-              </h3>
-            )}
           </div>
         </Card>
 
         {/* 5. Outstanding */}
-        <Card className="p-5 border-slate-200/80 hover:shadow-md transition-shadow">
-          <div className="flex items-start justify-between">
-            <div className="h-10 w-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+        <Card className="p-5 bg-white border border-slate-100 rounded-2xl shadow-xs hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-3.5">
+            <div className="h-11 w-11 rounded-xl bg-orange-50 border border-orange-100/60 text-orange-600 flex items-center justify-center shrink-0">
               <Clock className="h-5 w-5" />
             </div>
-            <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-              {summary?.pendingExpenseApprovalCount ?? 6} {language === 'km' ? 'វិក្កយបត្រ' : 'invoices'}
-            </span>
+            <div>
+              <p className="text-sm font-bold text-slate-800 leading-tight">ការទូទាត់នៅសល់</p>
+              <p className="text-[11px] font-medium text-slate-400 mt-0.5">Outstanding</p>
+            </div>
           </div>
-          <div className="mt-4">
-            <p className="text-xs font-medium text-slate-500">{t.dashboard.outstanding}</p>
-            {loading ? (
-              <Skeleton className="h-8 w-24 mt-1" />
-            ) : (
-              <h3 className="text-2xl font-bold text-slate-900 mt-1 text-orange-600">
-                {summary?.totalOutstandingBalance
-                  ? formatCurrency(summary.totalOutstandingBalance)
-                  : '$86.4K'}
-              </h3>
-            )}
+          <div className="flex items-end justify-between mt-4">
+            <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+              {summary?.totalOutstandingBalance
+                ? formatCurrency(summary.totalOutstandingBalance)
+                : '$86.4K'}
+            </h3>
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500">
+              <Clock className="h-3.5 w-3.5 text-slate-400" />
+              {summary?.pendingExpenseApprovalCount ?? 6} invoices
+            </span>
           </div>
         </Card>
       </div>
 
       {/* Financial Overview Chart Card matching Figma */}
-      <Card className="p-6 border-slate-200/80">
+      <Card className="p-6 bg-white border border-slate-100 rounded-2xl shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-100">
           <div>
-            <h2 className="text-base font-bold text-slate-900">{t.dashboard.financialOverview}</h2>
-            <p className="text-xs text-slate-500">{t.dashboard.financialOverviewSub}</p>
+            <h2 className="text-base font-bold text-slate-900">ទិដ្ឋភាពហិរញ្ញវត្ថុ</h2>
+            <p className="text-xs text-slate-400 font-medium mt-0.5">Financial Overview - USD</p>
           </div>
 
           <div className="flex items-center gap-2">
-            <select className="h-8 px-2.5 text-xs font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none">
-              <option>{t.dashboard.last6Months}</option>
-              <option>{t.dashboard.thisYear}</option>
+            <select className="h-9 px-3 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl focus:outline-none shadow-2xs">
+              <option>៦ ខែចុងក្រោយ</option>
+              <option>ឆ្នាំនេះ</option>
             </select>
           </div>
         </div>
 
         {/* 3 Metric Figures */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 my-6 px-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 my-6 px-1">
           <div>
-            <p className="text-xs font-medium text-slate-500">{t.dashboard.totalInvoiced}</p>
-            <h4 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
+            <p className="text-xs font-medium text-slate-500">ចំណូលសរុប</p>
+            <h4 className="text-2xl font-extrabold text-slate-900 mt-1">
               {summary?.totalInvoiced ? formatCurrency(summary.totalInvoiced) : '$624,800'}
             </h4>
-            <span className="text-[11px] font-semibold text-emerald-600 flex items-center gap-0.5 mt-0.5">
-              <ArrowUpRight className="h-3 w-3" /> +18.4%
+            <span className="text-xs font-semibold text-emerald-600 flex items-center gap-0.5 mt-0.5">
+              +18.4%
             </span>
           </div>
 
           <div>
-            <p className="text-xs font-medium text-slate-500">{t.dashboard.totalExpenses}</p>
-            <h4 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
+            <p className="text-xs font-medium text-slate-500">ចំណាយសរុប</p>
+            <h4 className="text-2xl font-extrabold text-slate-900 mt-1">
               {summary?.totalExpenses ? formatCurrency(summary.totalExpenses) : '$386,240'}
             </h4>
-            <span className="text-[11px] font-semibold text-emerald-600 flex items-center gap-0.5 mt-0.5">
-              <ArrowUpRight className="h-3 w-3" /> +8.2%
+            <span className="text-xs font-semibold text-emerald-600 flex items-center gap-0.5 mt-0.5">
+              +8.2%
             </span>
           </div>
 
           <div>
-            <p className="text-xs font-medium text-slate-500">{t.dashboard.netProfit}</p>
-            <h4 className="text-xl sm:text-2xl font-bold text-blue-600 mt-1">
+            <p className="text-xs font-medium text-slate-500">ប្រាក់ចំណេញ</p>
+            <h4 className="text-2xl font-extrabold text-[#1D64F2] mt-1">
               {netProfit ? formatCurrency(netProfit) : '$238,560'}
             </h4>
-            <span className="text-[11px] font-semibold text-slate-500 mt-0.5 block">
-              38.2% Margin
+            <span className="text-xs font-medium text-slate-400 mt-0.5 block">
+              38.2%
             </span>
           </div>
         </div>
@@ -342,8 +352,8 @@ export default function DashboardPage() {
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#2563EB" stopOpacity={0.18} />
-                  <stop offset="95%" stopColor="#2563EB" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="#1D64F2" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="#1D64F2" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
@@ -352,6 +362,8 @@ export default function DashboardPage() {
                 tickLine={false}
                 axisLine={false}
                 tick={{ fill: '#94A3B8', fontSize: 11 }}
+                ticks={[0, 50000, 100000, 150000]}
+                domain={[0, 150000]}
                 tickFormatter={(val) => `$${val >= 1000 ? `${val / 1000}K` : val}`}
               />
               <Tooltip
@@ -362,7 +374,7 @@ export default function DashboardPage() {
                 type="monotone"
                 dataKey="revenue"
                 name={language === 'km' ? 'ចំណូលសរុប' : 'Revenue'}
-                stroke="#2563EB"
+                stroke="#1D64F2"
                 strokeWidth={3}
                 fillOpacity={1}
                 fill="url(#colorRevenue)"
@@ -371,9 +383,9 @@ export default function DashboardPage() {
                 type="monotone"
                 dataKey="expenses"
                 name={language === 'km' ? 'ចំណាយសរុប' : 'Expenses'}
-                stroke="#F59E0B"
-                strokeWidth={2}
-                strokeDasharray="4 4"
+                stroke="#EAB308"
+                strokeWidth={2.5}
+                strokeDasharray="5 5"
                 dot={false}
               />
             </AreaChart>
@@ -417,7 +429,7 @@ export default function DashboardPage() {
                       </Badge>
                     </div>
                     <p className="text-[11px] text-slate-500 mt-0.5 truncate">
-                      {p.projectCode} • {p.clientName || 'Civil Client'} • {p.location || 'Phnom Penh'}
+                      {[p.projectCode, p.clientName, p.location].filter(Boolean).join(' • ')}
                     </p>
                   </div>
 

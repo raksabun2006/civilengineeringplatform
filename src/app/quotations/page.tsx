@@ -299,7 +299,7 @@ export default function QuotationsPage() {
                       {q.quotationCode}
                     </TableCell>
                     <TableCell className="text-xs font-semibold text-slate-900">
-                      {q.clientName || 'Civil Client'}
+                      {q.clientName || '-'}
                     </TableCell>
                     <TableCell className="text-xs text-slate-700">
                       {formatCurrency(q.subtotal)}

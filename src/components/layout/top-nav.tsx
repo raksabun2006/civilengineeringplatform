@@ -44,9 +44,8 @@ export function TopNav({ onMenuClick }: { onMenuClick?: () => void }) {
         .split(' ')
         .map((n) => n[0])
         .join('')
-        .toUpperCase()
         .slice(0, 2)
-    : 'EB';
+    : 'ចដ';
 
   return (
     <header className="h-20 bg-white border-b border-slate-100 flex items-center justify-between px-6 sticky top-0 z-40 shadow-2xs">
@@ -164,10 +163,10 @@ export function TopNav({ onMenuClick }: { onMenuClick?: () => void }) {
             </div>
             <div className="hidden md:flex flex-col text-left">
               <span className="text-xs font-bold text-slate-800 leading-tight">
-                {user?.fullName || 'EngineerBiz User'}
+                {user?.fullName || 'ចាន់ ដារ៉ា'}
               </span>
               <span className="text-[10px] text-slate-500 font-medium">
-                {user?.jobTitle || user?.role || 'Staff'}
+                {user?.jobTitle || user?.role || 'Project Manager'}
               </span>
             </div>
             <ChevronDown className="h-4 w-4 text-slate-400" />

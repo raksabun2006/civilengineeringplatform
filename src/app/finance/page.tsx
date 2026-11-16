@@ -209,7 +209,7 @@ export default function FinancePage() {
     try {
       await financeService.createExpense({
         projectId: selectedProjectId,
-        title: expenseDesc || 'Project Site Expense',
+        title: expenseDesc || expenseCategory.replace('_', ' '),
         category: expenseCategory,
         amount: Number(expenseAmount),
         expenseDate: new Date().toISOString().split('T')[0],
