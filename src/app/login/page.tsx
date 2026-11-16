@@ -6,11 +6,12 @@ import { useAuth } from '@/context/auth-context';
 import { useLanguage } from '@/lib/i18n/language-context';
 import { getErrorMessage } from '@/lib/api/client';
 import { Mail, Lock, Eye, EyeOff, ShieldCheck, HelpCircle } from 'lucide-react';
+import { CambodiaFlag, UkFlag } from '@/components/ui/country-flag';
 
 export default function LoginPage() {
   const router = useRouter();
   const { login, isAuthenticated } = useAuth();
-  const { language } = useLanguage();
+  const { language, setLanguage, getLocalizedPath } = useLanguage();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,9 +22,9 @@ export default function LoginPage() {
 
   React.useEffect(() => {
     if (isAuthenticated) {
-      router.push('/dashboard');
+      router.push(getLocalizedPath('/dashboard'));
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, getLocalizedPath]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,7 +113,26 @@ export default function LoginPage() {
           RIGHT PANEL: Clean Login Form matching screenshot
       ========================================================================= */}
       <div className="w-full lg:w-1/2 flex flex-col justify-between px-6 sm:px-12 lg:px-20 py-8 relative bg-white">
-        <div />
+        <div className="flex justify-end w-full">
+          {/* Single Country Flag (Click to toggle language, no bg or border) */}
+          <button
+            type="button"
+            onClick={() => setLanguage(language === 'km' ? 'en' : 'km')}
+            title={
+              language === 'km'
+                ? 'ភាសាខ្មែរ (ចុចដើម្បីប្តូរទៅជា English)'
+                : 'English (Click to switch to ភាសាខ្មែរ)'
+            }
+            aria-label="Toggle language"
+            className="p-1 rounded-sm hover:opacity-80 transition-opacity cursor-pointer shrink-0 inline-flex items-center justify-center"
+          >
+            {language === 'km' ? (
+              <CambodiaFlag className="w-7 h-5 rounded-xs object-cover" />
+            ) : (
+              <UkFlag className="w-7 h-5 rounded-xs object-cover" />
+            )}
+          </button>
+        </div>
 
         {/* Main Centered Form Container */}
         <div className="w-full max-w-md mx-auto my-auto py-8">

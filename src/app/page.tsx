@@ -10,10 +10,12 @@ export default function RootPage() {
 
   useEffect(() => {
     if (!isLoading) {
+      const savedLang = (typeof window !== 'undefined' && localStorage.getItem('engineerbiz_lang')) || 'km';
+      const lang = savedLang === 'en' ? 'en' : 'km';
       if (isAuthenticated) {
-        router.replace('/dashboard');
+        router.replace(`/${lang}/dashboard`);
       } else {
-        router.replace('/login');
+        router.replace(`/${lang}/login`);
       }
     }
   }, [isLoading, isAuthenticated, router]);

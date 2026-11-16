@@ -10,14 +10,23 @@ import {
   Settings,
   Menu,
   Check,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 import { useLanguage } from '@/lib/i18n/language-context';
 import { notificationService } from '@/lib/api/services/document.service';
 import { NotificationResponse } from '@/types/api';
 import Link from 'next/link';
+import { CambodiaFlag, UkFlag } from '@/components/ui/country-flag';
 
-export function TopNav({ onMenuClick }: { onMenuClick?: () => void }) {
+export function TopNav({
+  onMenuClick,
+  sidebarOpen = true,
+}: {
+  onMenuClick?: () => void;
+  sidebarOpen?: boolean;
+}) {
   const { user, logout } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const [profileOpen, setProfileOpen] = useState(false);
@@ -49,13 +58,14 @@ export function TopNav({ onMenuClick }: { onMenuClick?: () => void }) {
 
   return (
     <header className="h-20 bg-white border-b border-slate-100 flex items-center justify-between px-6 sticky top-0 z-40 shadow-2xs">
-      {/* Left: Mobile hamburger & Global Search */}
-      <div className="flex items-center gap-4 flex-1 max-w-xl">
+      {/* Left: Mobile Menu Button & Global Search */}
+      <div className="flex items-center gap-3 flex-1 max-w-xl">
         <button
           onClick={onMenuClick}
-          className="lg:hidden p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100"
+          title={language === 'km' ? 'បើកម៉ឺនុយ' : 'Open Menu'}
+          className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent hover:border-slate-200/60 transition-all cursor-pointer shrink-0 lg:hidden"
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="h-5 w-5 text-slate-600" />
         </button>
 
         <div className="relative w-full max-w-md hidden sm:block">
@@ -125,29 +135,24 @@ export function TopNav({ onMenuClick }: { onMenuClick?: () => void }) {
           )}
         </div>
 
-        {/* Language Switcher */}
-        <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/60">
-          <button
-            onClick={() => setLanguage('km')}
-            className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-              language === 'km'
-                ? 'bg-white text-blue-600 shadow-2xs font-bold'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            ខ្មែរ
-          </button>
-          <button
-            onClick={() => setLanguage('en')}
-            className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-              language === 'en'
-                ? 'bg-white text-blue-600 shadow-2xs font-bold'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            EN
-          </button>
-        </div>
+        {/* Single Country Flag (Click to toggle language, no bg or border) */}
+        <button
+          type="button"
+          onClick={() => setLanguage(language === 'km' ? 'en' : 'km')}
+          title={
+            language === 'km'
+              ? 'ភាសាខ្មែរ (ចុចដើម្បីប្តូរទៅជា English)'
+              : 'English (Click to switch to ភាសាខ្មែរ)'
+          }
+          aria-label="Toggle language"
+          className="p-1 rounded-sm hover:opacity-80 transition-opacity cursor-pointer shrink-0 inline-flex items-center justify-center"
+        >
+          {language === 'km' ? (
+            <CambodiaFlag className="w-7 h-5 rounded-xs object-cover" />
+          ) : (
+            <UkFlag className="w-7 h-5 rounded-xs object-cover" />
+          )}
+        </button>
 
         {/* User Profile */}
         <div className="relative">
